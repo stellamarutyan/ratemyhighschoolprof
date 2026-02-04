@@ -12,8 +12,17 @@ const TRIVIA_DB = [
 let currentTrivia = null;
 
 // Initialize Supabase
-const { createClient } = supabase;
-const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+let db = null;
+try {
+    if (typeof supabase !== 'undefined') {
+        const { createClient } = supabase;
+        db = createClient(SUPABASE_URL, SUPABASE_KEY);
+    } else {
+        console.warn("Supabase SDK not loaded (Offline Mode)");
+    }
+} catch (e) {
+    console.warn("Supabase Init Failed (Offline Mode):", e);
+}
 
 // State
 let classes = [];
@@ -24,6 +33,7 @@ let isAuthenticated = false;
 const loginView = document.getElementById('login-view');
 const appContent = document.getElementById('app-content');
 const triviaInput = document.getElementById('trivia-input');
+// Use robust selector
 const triviaQuestionEl = document.querySelector('.challenge-q');
 const triviaError = document.getElementById('trivia-error');
 const loginForm = document.getElementById('login-form');
@@ -56,7 +66,8 @@ const checkAuth = () => {
     const hasPassed = localStorage.getItem('vibe_check_passed');
     if (hasPassed === 'true') {
         isAuthenticated = true;
-        fetchData(); // Load data from Supabase (public read)
+        if (db) fetchData();
+        else console.warn("Authenticated but no DB connection.");
     } else {
         initTrivia();
     }
@@ -64,10 +75,10 @@ const checkAuth = () => {
 };
 
 const initTrivia = () => {
+    if (!triviaQuestionEl) return;
     const randomIndex = Math.floor(Math.random() * TRIVIA_DB.length);
     currentTrivia = TRIVIA_DB[randomIndex];
     triviaQuestionEl.textContent = `Question: ${currentTrivia.q}`;
-    // debug
     console.log("Answer:", currentTrivia.a[0]);
 };
 
@@ -75,10 +86,10 @@ const handleLogin = (e) => {
     e.preventDefault();
     const answer = triviaInput.value.trim().toLowerCase();
 
-    if (currentTrivia.a.includes(answer)) {
+    if (currentTrivia && currentTrivia.a.includes(answer)) {
         localStorage.setItem('vibe_check_passed', 'true');
         isAuthenticated = true;
-        fetchData();
+        if (db) fetchData();
         toggleAuthUI();
         triviaInput.value = '';
         triviaError.classList.add('hidden');
@@ -93,7 +104,7 @@ const handleLogout = () => {
     localStorage.removeItem('vibe_check_passed');
     isAuthenticated = false;
     toggleAuthUI();
-    initTrivia(); // Reset question
+    initTrivia();
 };
 
 const toggleAuthUI = () => {
@@ -115,16 +126,7 @@ const getAvg = (reviews, key) => {
 
 // Fetch Data
 const fetchData = async () => {
-    // Fetch classes and their reviews
-    const { data, error } = await db
-        .from('classes')
-        .select(`
-            *,
-            reviews (*)
-        `);
-
-    if (error) {
-        console.error("Error fetching data:", error);
+    if (!db) {
         // Fallback or show error
         // If Supabase isn't setup yet, showing mock data helps testing
         if (SUPABASE_URL.includes('YOUR_SUPABASE')) {
@@ -136,6 +138,19 @@ const fetchData = async () => {
             renderClassList(searchInput.value);
             return;
         }
+        return;
+    };
+
+    // Fetch classes and their reviews
+    const { data, error } = await db
+        .from('classes')
+        .select(`
+            *,
+            reviews (*)
+        `);
+
+    if (error) {
+        console.error("Error fetching data:", error);
         return;
     }
 
@@ -231,12 +246,12 @@ const updateBar = (bar, val, score) => {
 };
 
 // Event Listeners
-loginForm.addEventListener('submit', handleLogin);
-logoutBtn.addEventListener('click', handleLogout);
+if (loginForm) loginForm.addEventListener('submit', handleLogin);
+if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
 
-searchInput.addEventListener('input', (e) => renderClassList(e.target.value));
+if (searchInput) searchInput.addEventListener('input', (e) => renderClassList(e.target.value));
 
-backBtn.addEventListener('click', () => {
+if (backBtn) backBtn.addEventListener('click', () => {
     classView.classList.add('hidden');
     homeView.classList.remove('hidden');
     activeClassId = null;
@@ -244,20 +259,20 @@ backBtn.addEventListener('click', () => {
 });
 
 // Modal Logic
-addReviewBtn.addEventListener('click', () => {
+if (addReviewBtn) addReviewBtn.addEventListener('click', () => {
     modalOverlay.classList.remove('hidden');
     rateForm.reset();
 });
 
-closeModalBtn.addEventListener('click', () => {
+if (closeModalBtn) closeModalBtn.addEventListener('click', () => {
     modalOverlay.classList.add('hidden');
 });
 
-modalOverlay.addEventListener('click', (e) => {
+if (modalOverlay) modalOverlay.addEventListener('click', (e) => {
     if (e.target === modalOverlay) modalOverlay.classList.add('hidden');
 });
 
-rateForm.addEventListener('submit', async (e) => {
+if (rateForm) rateForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!activeClassId) return;
 
@@ -269,22 +284,24 @@ rateForm.addEventListener('submit', async (e) => {
         quality: parseInt(formData.get('quality')),
         vibe: formData.get('vibe'),
         grade: "N/A"
-        // No user_email since we are doing anonymity for students now
     };
 
-    // Optimistic UI Update (optional, but let's just wait for DB for simplicity)
-    const { error } = await db.from('reviews').insert([newReview]);
-
-    if (error) {
-        alert("Error submitting review: " + error.message);
-        return;
+    // Optimistic UI Update
+    if (db) {
+        const { error } = await db.from('reviews').insert([newReview]);
+        if (error) {
+            alert("Error submitting review: " + error.message);
+            return;
+        }
+        await fetchData();
+    } else {
+        alert("Success! (Offline Mode - Review not saved permanently)");
     }
 
-    // Refresh Data
-    await fetchData();
     openClass(activeClassId); // Re-render profile
     modalOverlay.classList.add('hidden');
 });
 
 // Init
+console.log("Script loaded, starting init...");
 checkAuth();

@@ -82,6 +82,12 @@ header {
 .section-title {
     font-size: 1.25rem;
     font-weight: 700;
+}
+
+.section-title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1rem;
 }
 

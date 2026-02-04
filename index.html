@@ -15,23 +15,11 @@
 <body>
     <div class="app-container">
         <!-- Login View (Challenge Mode) -->
-        <section id="login-view" class="view active">
-            <div class="login-container">
-                <h1>✨ Vibe Check</h1>
-                <p>Private for Mater Dei Students.</p>
-                <div class="challenge-box">
-                    <p class="challenge-q">Loading challenge...</p>
-                    <form id="login-form">
-                        <input type="text" id="trivia-input" placeholder="Enter answer..." autocomplete="off">
-                        <button type="submit" class="btn-primary full-width">Unlock Access</button>
-                    </form>
-                    <p id="trivia-error" class="error-msg hidden">Nope! Try again.</p>
-                </div>
-            </div>
-        </section>
+        <!-- Login View Removed -->
 
         <!-- Main App (Hidden by default) -->
-        <div id="app-content" class="hidden">
+        <!-- Main App -->
+        <div id="app-content">
             <header>
                 <div class="header-top">
                     <div class="logo">✨ Vibe Check</div>
@@ -39,14 +27,15 @@
                 </div>
                 <div class="search-bar">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="search-input" placeholder="Search class or teacher...">
+                    <input type="text" id="search-input" placeholder="Search teacher...">
                 </div>
             </header>
 
             <main id="main-content">
                 <!-- Home View -->
                 <section id="home-view" class="view active">
-                    <div class="section-title">🔥 Trending Classes</div>
+                    <div class="section-title">🔥 Trending Teachers</div>
+                    <!-- Add Class Button Removed -->
                     <div id="class-list" class="card-grid">
                         <!-- Classes injected here -->
                     </div>
@@ -76,7 +65,7 @@
                             <div id="val-homework" class="score-val">0.0</div>
                         </div>
                         <div class="score-card">
-                            <div class="score-label">Teacher Quality</div>
+                            <div class="score-label">Quality</div>
                             <div class="score-bar-bg">
                                 <div id="bar-quality" class="score-bar" style="width:0%"></div>
                             </div>
@@ -86,7 +75,7 @@
 
                     <div class="section-header">
                         <h3>💬 Vibe Checks</h3>
-                        <button id="add-review-btn" class="btn-primary small">Rate Class</button>
+                        <button id="add-review-btn" class="btn-primary small">Rate Teacher</button>
                     </div>
 
                     <div id="reviews-list" class="reviews-list">
@@ -94,36 +83,51 @@
                     </div>
                 </section>
             </main>
-            <form id="rate-form">
-                <div class="slider-group">
-                    <label>Difficulty (1 = Easy A, 5 = Impossible)</label>
-                    <input type="range" id="input-difficulty" name="difficulty" min="1" max="5" step="1" value="3">
-                    <div class="range-labels"><span>1</span><span>5</span></div>
-                </div>
 
-                <div class="slider-group">
-                    <label>Homework (1 = None, 5 = Drowning)</label>
-                    <input type="range" id="input-homework" name="homework" min="1" max="5" step="1" value="3">
-                    <div class="range-labels"><span>1</span><span>5</span></div>
-                </div>
+            <!-- Rate Modal -->
+            <div id="modal-overlay" class="modal-overlay hidden">
+                <div class="modal">
+                    <div class="modal-header">
+                        <h2 id="modal-title">Rate this Teacher</h2>
+                        <button id="close-modal" class="btn-icon">&times;</button>
+                    </div>
 
-                <div class="slider-group">
-                    <label>Teacher Quality (1 = Avoid, 5 = GOAT)</label>
-                    <input type="range" id="input-quality" name="quality" min="1" max="5" step="1" value="3">
-                    <div class="range-labels"><span>1</span><span>5</span></div>
-                </div>
+                    <!-- Rate Form -->
+                    <form id="rate-form">
+                        <div class="slider-group">
+                            <label>Difficulty (1 = Easy A, 5 = Impossible)</label>
+                            <input type="range" id="input-difficulty" name="difficulty" min="1" max="5" step="1"
+                                value="3">
+                            <div class="range-labels"><span>1</span><span>5</span></div>
+                        </div>
 
-                <div class="form-group">
-                    <label>Vibe Check (Comments)</label>
-                    <textarea id="input-vibe" name="vibe" rows="3" placeholder="What's the tea? 🍵" required></textarea>
-                </div>
+                        <div class="slider-group">
+                            <label>Homework (1 = None, 5 = Drowning)</label>
+                            <input type="range" id="input-homework" name="homework" min="1" max="5" step="1" value="3">
+                            <div class="range-labels"><span>1</span><span>5</span></div>
+                        </div>
 
-                <button type="submit" class="btn-primary full-width">Post Vibe Check</button>
-            </form>
+                        <div class="slider-group">
+                            <label>Quality (1 = Avoid, 5 = GOAT)</label>
+                            <input type="range" id="input-quality" name="quality" min="1" max="5" step="1" value="3">
+                            <div class="range-labels"><span>1</span><span>5</span></div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Vibe Check (Comments)</label>
+                            <textarea id="input-vibe" name="vibe" rows="3" placeholder="What's the tea? 🍵"
+                                required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn-primary full-width">Post Vibe Check</button>
+                    </form>
+
+                    <!-- Add Class Form Removed -->
+                </div>
+            </div>
         </div>
     </div>
-    </div>
-    <script src="script.js"></script>
+    <script src="script.js?v=2"></script>
 </body>
 
 </html>

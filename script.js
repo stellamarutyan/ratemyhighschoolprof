@@ -2,14 +2,7 @@
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';
 const SUPABASE_KEY = 'YOUR_SUPABASE_KEY';
 
-// TRIVIA CONFIGURATION
-const TRIVIA_DB = [
-    { q: "What year was the school founded?", a: ["1950"] },
-    { q: "What is the max number of blocks you can take (enter a number)?", a: ["8", "eight"] },
-    { q: "What sport is the most known at our school?", a: ["football", "american football"] }
-];
 
-let currentTrivia = null;
 
 // Initialize Supabase
 let db = null;
@@ -27,17 +20,10 @@ try {
 // State
 let classes = [];
 let activeClassId = null;
-let isAuthenticated = false;
 
 // DOM
-const loginView = document.getElementById('login-view');
+// DOM
 const appContent = document.getElementById('app-content');
-const triviaInput = document.getElementById('trivia-input');
-// Use robust selector
-const triviaQuestionEl = document.querySelector('.challenge-q');
-const triviaError = document.getElementById('trivia-error');
-const loginForm = document.getElementById('login-form');
-const logoutBtn = document.getElementById('logout-btn');
 
 const homeView = document.getElementById('home-view');
 const classView = document.getElementById('class-view');
@@ -56,66 +42,16 @@ const barQual = document.getElementById('bar-quality');
 const valQual = document.getElementById('val-quality');
 
 // Modal DOM
+// Modal DOM
 const modalOverlay = document.getElementById('modal-overlay');
 const addReviewBtn = document.getElementById('add-review-btn');
 const closeModalBtn = document.getElementById('close-modal');
 const rateForm = document.getElementById('rate-form');
+const modalTitle = document.getElementById('modal-title');
+// Add Class DOM Removed
 
 // Auth Logic (Trivia Mode)
-const checkAuth = () => {
-    const hasPassed = localStorage.getItem('vibe_check_passed');
-    if (hasPassed === 'true') {
-        isAuthenticated = true;
-        if (db) fetchData();
-        else console.warn("Authenticated but no DB connection.");
-    } else {
-        initTrivia();
-    }
-    toggleAuthUI();
-};
 
-const initTrivia = () => {
-    if (!triviaQuestionEl) return;
-    const randomIndex = Math.floor(Math.random() * TRIVIA_DB.length);
-    currentTrivia = TRIVIA_DB[randomIndex];
-    triviaQuestionEl.textContent = `Question: ${currentTrivia.q}`;
-    console.log("Answer:", currentTrivia.a[0]);
-};
-
-const handleLogin = (e) => {
-    e.preventDefault();
-    const answer = triviaInput.value.trim().toLowerCase();
-
-    if (currentTrivia && currentTrivia.a.includes(answer)) {
-        localStorage.setItem('vibe_check_passed', 'true');
-        isAuthenticated = true;
-        if (db) fetchData();
-        toggleAuthUI();
-        triviaInput.value = '';
-        triviaError.classList.add('hidden');
-    } else {
-        triviaError.classList.remove('hidden');
-        triviaInput.classList.add('shake');
-        setTimeout(() => triviaInput.classList.remove('shake'), 500);
-    }
-};
-
-const handleLogout = () => {
-    localStorage.removeItem('vibe_check_passed');
-    isAuthenticated = false;
-    toggleAuthUI();
-    initTrivia();
-};
-
-const toggleAuthUI = () => {
-    if (isAuthenticated) {
-        loginView.classList.add('hidden');
-        appContent.classList.remove('hidden');
-    } else {
-        loginView.classList.remove('hidden');
-        appContent.classList.add('hidden');
-    }
-};
 
 // Utils
 const getAvg = (reviews, key) => {
@@ -130,10 +66,70 @@ const fetchData = async () => {
         // Fallback or show error
         // If Supabase isn't setup yet, showing mock data helps testing
         if (SUPABASE_URL.includes('YOUR_SUPABASE')) {
-            console.warn("Using MOCK DATA because Supabase is not configured.");
+            console.warn("Using HARDCODED DATA.");
             classes = [
-                { id: '1', name: 'AP U.S. History', teacher: 'Mr. Anderson', reviews: [{ quality: 5, difficulty: 5, homework: 5, vibe: 'Great class' }] },
-                { id: '2', name: 'AP Physics', teacher: 'Ms. Frizzle', reviews: [] }
+                { id: '1', teacher: 'Mrs. Kate Aceves', name: 'English Teacher', reviews: [] },
+                { id: '2', teacher: 'Ms. Nataly Alvarado', name: 'Social Worker', reviews: [] },
+                { id: '3', teacher: 'Mr. Kevin Anderson', name: 'Head Athletic Trainer', reviews: [] },
+                { id: '4', teacher: 'Ms. Sarai Avila', name: 'English Teacher', reviews: [] },
+                { id: '5', teacher: 'Mr. Brian Barsuglia', name: 'English Teacher', reviews: [] },
+                { id: '6', teacher: 'Mrs. Jennifer Battaglia', name: 'World Languages', reviews: [] },
+                { id: '7', teacher: 'Mrs. Patricia Berrelleza', name: 'World Languages', reviews: [] },
+                { id: '8', teacher: 'Ms. Kathryn Bystedt \'01', name: 'Religious Studies', reviews: [] },
+                { id: '9', teacher: 'Mr. Kenneth Connolly', name: 'Film and Media Arts', reviews: [] },
+                { id: '10', teacher: 'Ms. Taylor Cooper', name: 'Math Teacher', reviews: [] },
+                { id: '11', teacher: 'Mr. Vincent Dao', name: 'Religious Studies', reviews: [] },
+                { id: '12', teacher: 'Ms. Caroline Davies', name: 'Visual Arts Teacher', reviews: [] },
+                { id: '13', teacher: 'Mr. Ben De Los Reyes', name: 'Religious Studies', reviews: [] },
+                { id: '14', teacher: 'Mr. Justin Deskovick \'08', name: 'Social Studies', reviews: [] },
+                { id: '15', teacher: 'Mr. Ken Dory', name: 'Learning Center', reviews: [] },
+                { id: '16', teacher: 'Ms. Aracely Elizondo', name: 'World Languages', reviews: [] },
+                { id: '17', teacher: 'Ms. Agnes Faltas', name: 'Science Teacher', reviews: [] },
+                { id: '18', teacher: 'Mrs. Andrea Fouts', name: 'Musical Theatre', reviews: [] },
+                { id: '19', teacher: 'Mr. Sean Ganey', name: 'Math Teacher', reviews: [] },
+                { id: '20', teacher: 'Mr. Joseph Garcia', name: 'Science Teacher', reviews: [] },
+                { id: '21', teacher: 'Mrs. Sonia Garcia', name: 'World Languages', reviews: [] },
+                { id: '22', teacher: 'Ms. Anna-Lisa George \'89', name: 'English Teacher', reviews: [] },
+                { id: '23', teacher: 'Mrs. Kali Gomez \'01', name: 'Science Dept Chair', reviews: [] },
+                { id: '24', teacher: 'Mr. William Griffith', name: 'Math Teacher', reviews: [] },
+                { id: '25', teacher: 'Mrs. Maria Gutierrez-Barnett', name: 'Social Studies', reviews: [] },
+                { id: '26', teacher: 'Ms. Gina Hanson', name: 'Math Teacher', reviews: [] },
+                { id: '27', teacher: 'Ms. Nicole Howard \'85', name: 'Journalism', reviews: [] },
+                { id: '28', teacher: 'Mrs. Denise Johnson \'83', name: 'English Teacher', reviews: [] },
+                { id: '29', teacher: 'Dr. Erin Kelly', name: 'English Teacher', reviews: [] },
+                { id: '30', teacher: 'Mrs. Eunice Kim', name: 'English Dept Chair', reviews: [] },
+                { id: '31', teacher: 'Mrs. Charisse Kitsinis', name: 'Social Studies', reviews: [] },
+                { id: '32', teacher: 'Mr. Jonathan Knauer \'10', name: 'Choir Teacher', reviews: [] },
+                { id: '33', teacher: 'Mr. Andrew Kubasek', name: 'English Teacher', reviews: [] },
+                { id: '34', teacher: 'Mrs. Madison Leal', name: 'Theatre Arts', reviews: [] },
+                { id: '35', teacher: 'Mr. Sean Lieblang', name: 'Math Teacher', reviews: [] },
+                { id: '36', teacher: 'Mr. Joshua Long', name: 'English Teacher', reviews: [] },
+                { id: '37', teacher: 'Ms. Zeyda Marsh', name: 'World Languages', reviews: [] },
+                { id: '38', teacher: 'Mr. Fernando Martinez', name: 'Instrumental Music', reviews: [] },
+                { id: '39', teacher: 'Mr. Rick Martinez \'83', name: 'Science Teacher', reviews: [] },
+                { id: '40', teacher: 'Mr. Mark Mulholland', name: 'Social Studies', reviews: [] },
+                { id: '41', teacher: 'Mr. Daniel Munguia', name: 'World Languages', reviews: [] },
+                { id: '42', teacher: 'Mr. Dan O\'Dell', name: 'Math Teacher', reviews: [] },
+                { id: '43', teacher: 'Ms. Jessica Pan', name: 'Visual Arts Teacher', reviews: [] },
+                { id: '44', teacher: 'Mr. Kelly Petro', name: 'Science Teacher', reviews: [] },
+                { id: '45', teacher: 'Mr. Christopher Pham', name: 'World Languages', reviews: [] },
+                { id: '46', teacher: 'Mr. Jack Phan', name: 'Science Teacher', reviews: [] },
+                { id: '47', teacher: 'Ms. Stephanie Phillips', name: 'English Teacher', reviews: [] },
+                { id: '48', teacher: 'Mr. James Rebudal', name: 'Religious Studies', reviews: [] },
+                { id: '49', teacher: 'Mr. Andrew Roberts', name: 'Film and Media Arts', reviews: [] },
+                { id: '50', teacher: 'Mr. Kyle Roberts', name: 'Visual Arts', reviews: [] },
+                { id: '51', teacher: 'Mrs. Elizabeth Rosales', name: 'Religious Studies', reviews: [] },
+                { id: '52', teacher: 'Ms. Sarah Serna', name: 'Social Studies', reviews: [] },
+                { id: '53', teacher: 'Mrs. Susana Siffredi', name: 'World Languages', reviews: [] },
+                { id: '54', teacher: 'Ms. Sarah Smith \'97', name: 'Science Teacher', reviews: [] },
+                { id: '55', teacher: 'Mrs. Melissa Sordan', name: 'English Teacher', reviews: [] },
+                { id: '56', teacher: 'Ms. Dorinda Upham', name: 'Religious Studies', reviews: [] },
+                { id: '57', teacher: 'Ms. Marla Utley', name: 'Science Teacher', reviews: [] },
+                { id: '58', teacher: 'Ms. Nora Valle', name: 'Social Studies', reviews: [] },
+                { id: '59', teacher: 'Mr. Ben Van Dyk', name: 'Social Studies', reviews: [] },
+                { id: '60', teacher: 'Mr. Anthony Vasquez \'85', name: 'Math Teacher', reviews: [] },
+                { id: '61', teacher: 'Mr. Matty West', name: 'Social Studies', reviews: [] },
+                { id: '62', teacher: 'Ms. Shannon Zimmerman', name: 'Dance & Yoga', reviews: [] }
             ];
             renderClassList(searchInput.value);
             return;
@@ -164,7 +160,7 @@ const renderClassList = (filterText = '') => {
 
     classes.filter(c => {
         const query = filterText.toLowerCase();
-        return c.name.toLowerCase().includes(query) || c.teacher.toLowerCase().includes(query);
+        return c.teacher.toLowerCase().includes(query) || c.name.toLowerCase().includes(query);
     }).forEach(c => {
         const diff = getAvg(c.reviews, 'difficulty');
         const qual = getAvg(c.reviews, 'quality');
@@ -177,8 +173,8 @@ const renderClassList = (filterText = '') => {
         const card = document.createElement('div');
         card.className = 'class-card';
         card.innerHTML = `
-            <h3>${c.name}</h3>
-            <div class="teacher-name">${c.teacher}</div>
+            <h3>${c.teacher}</h3>
+            <div class="teacher-name">${c.name}</div>
             <div class="badges">${tags}</div>
         `;
         card.onclick = () => openClass(c.id);
@@ -194,8 +190,8 @@ const openClass = (id) => {
 
     // Header
     classHeader.innerHTML = `
-        <h2>${c.name}</h2>
-        <div class="teacher-name">${c.teacher}</div>
+        <h2>${c.teacher}</h2>
+        <div class="teacher-name">${c.name}</div>
     `;
 
     // Stats
@@ -246,8 +242,6 @@ const updateBar = (bar, val, score) => {
 };
 
 // Event Listeners
-if (loginForm) loginForm.addEventListener('submit', handleLogin);
-if (logoutBtn) logoutBtn.addEventListener('click', handleLogout);
 
 if (searchInput) searchInput.addEventListener('input', (e) => renderClassList(e.target.value));
 
@@ -258,11 +252,16 @@ if (backBtn) backBtn.addEventListener('click', () => {
     renderClassList(searchInput.value);
 });
 
+// Modal DOM (Consolidated above)
+
+// ... [Keep other code] ...
+
 // Modal Logic
 if (addReviewBtn) addReviewBtn.addEventListener('click', () => {
-    modalOverlay.classList.remove('hidden');
-    rateForm.reset();
+    openModal('rate');
 });
+
+
 
 if (closeModalBtn) closeModalBtn.addEventListener('click', () => {
     modalOverlay.classList.add('hidden');
@@ -271,6 +270,17 @@ if (closeModalBtn) closeModalBtn.addEventListener('click', () => {
 if (modalOverlay) modalOverlay.addEventListener('click', (e) => {
     if (e.target === modalOverlay) modalOverlay.classList.add('hidden');
 });
+
+const openModal = (type) => {
+    modalOverlay.classList.remove('hidden');
+    if (type === 'rate') {
+        modalTitle.textContent = "Rate this Teacher";
+        rateForm.classList.remove('hidden');
+        rateForm.reset();
+    }
+};
+
+// Add Class Logic Removed
 
 if (rateForm) rateForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -303,5 +313,10 @@ if (rateForm) rateForm.addEventListener('submit', async (e) => {
 });
 
 // Init
+// Init
 console.log("Script loaded, starting init...");
-checkAuth();
+if (db) fetchData();
+else {
+    // Attempt offline fetch if db isn't immediately ready or for mock mode logic
+    fetchData();
+}

@@ -378,7 +378,8 @@ textarea {
 /* Login View */
 .login-container {
     text-align: center;
-    margin-top: 30vh;
+    margin-top: 25vh;
+    padding: 0 1rem;
     animation: slideUp 0.5s ease;
 }
 
@@ -390,9 +391,66 @@ textarea {
     -webkit-text-fill-color: transparent;
 }
 
-.subtext {
-    color: var(--text-dim);
-    margin-bottom: 2rem;
+.challenge-box {
+    margin-top: 2rem;
+    background: var(--surface);
+    padding: 2rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.challenge-q {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: white;
+}
+
+#trivia-input {
+    width: 100%;
+    margin-bottom: 1rem;
+    background: var(--surface-hover);
+    border: 1px solid #444;
+    padding: 1rem;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+#trivia-input:focus {
+    border-color: var(--primary);
+}
+
+.error-msg {
+    color: #ff0055;
+    margin-top: 1rem;
+    font-weight: 700;
+    animation: shake 0.3s;
+}
+
+@keyframes shake {
+    0% {
+        transform: translateX(0);
+    }
+
+    25% {
+        transform: translateX(-5px);
+    }
+
+    75% {
+        transform: translateX(5px);
+    }
+
+    100% {
+        transform: translateX(0);
+    }
+}
+
+.shake {
+    animation: shake 0.3s;
+    border-color: #ff0055 !important;
 }
 
 .header-top {

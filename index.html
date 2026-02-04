@@ -14,13 +14,19 @@
 
 <body>
     <div class="app-container">
-        <!-- Login View -->
+        <!-- Login View (Challenge Mode) -->
         <section id="login-view" class="view active">
             <div class="login-container">
                 <h1>✨ Vibe Check</h1>
-                <p>Rate classes & find easy A's.</p>
-                <p class="subtext">Sign in with your school email to join.</p>
-                <button id="login-btn" class="btn-primary full-width">Sign in with Google</button>
+                <p>Private for Mater Dei Students.</p>
+                <div class="challenge-box">
+                    <p class="challenge-q">Loading challenge...</p>
+                    <form id="login-form">
+                        <input type="text" id="trivia-input" placeholder="Enter answer..." autocomplete="off">
+                        <button type="submit" class="btn-primary full-width">Unlock Access</button>
+                    </form>
+                    <p id="trivia-error" class="error-msg hidden">Nope! Try again.</p>
+                </div>
             </div>
         </section>
 

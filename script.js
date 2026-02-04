@@ -1,8 +1,15 @@
 // CONFIGURATION
 const SUPABASE_URL = 'YOUR_SUPABASE_URL';
 const SUPABASE_KEY = 'YOUR_SUPABASE_KEY';
-const SCHOOL_DOMAIN = 'stu.materdei.org'; // Domain restriction enabled
-const ADMIN_EMAIL = 'stella.marutyan@gmail.com'; // CHANGE THIS to your email
+
+// TRIVIA CONFIGURATION
+const TRIVIA_DB = [
+    { q: "What year was the school founded?", a: ["1950"] },
+    { q: "What is the max number of blocks you can take (enter a number)?", a: ["8", "eight"] },
+    { q: "What sport is the most known at our school?", a: ["football", "american football"] }
+];
+
+let currentTrivia = null;
 
 // Initialize Supabase
 const { createClient } = supabase;
@@ -11,12 +18,15 @@ const db = createClient(SUPABASE_URL, SUPABASE_KEY);
 // State
 let classes = [];
 let activeClassId = null;
-let currentUser = null;
+let isAuthenticated = false;
 
 // DOM
 const loginView = document.getElementById('login-view');
 const appContent = document.getElementById('app-content');
-const loginBtn = document.getElementById('login-btn');
+const triviaInput = document.getElementById('trivia-input');
+const triviaQuestionEl = document.querySelector('.challenge-q');
+const triviaError = document.getElementById('trivia-error');
+const loginForm = document.getElementById('login-form');
 const logoutBtn = document.getElementById('logout-btn');
 
 const homeView = document.getElementById('home-view');
@@ -41,44 +51,53 @@ const addReviewBtn = document.getElementById('add-review-btn');
 const closeModalBtn = document.getElementById('close-modal');
 const rateForm = document.getElementById('rate-form');
 
-// Auth Logic
-const handleLogin = async () => {
-    const { error } = await db.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-            queryParams: {
-                access_type: 'offline',
-                prompt: 'consent',
-            },
-        },
-    });
-    if (error) alert("Error logging in: " + error.message);
-};
-
-const handleLogout = async () => {
-    await db.auth.signOut();
-    currentUser = null;
-    toggleAuthUI();
-};
-
-const checkUser = async () => {
-    const { data: { session } } = await db.auth.getSession();
-    if (session?.user) {
-        // Domain Check
-        const email = session.user.email;
-        if (SCHOOL_DOMAIN && !email.endsWith(SCHOOL_DOMAIN)) {
-            alert(`Sorry! This app is only for students at ${SCHOOL_DOMAIN}`);
-            await db.auth.signOut();
-            return;
-        }
-        currentUser = session.user;
-        fetchData();
+// Auth Logic (Trivia Mode)
+const checkAuth = () => {
+    const hasPassed = localStorage.getItem('vibe_check_passed');
+    if (hasPassed === 'true') {
+        isAuthenticated = true;
+        fetchData(); // Load data from Supabase (public read)
+    } else {
+        initTrivia();
     }
     toggleAuthUI();
 };
 
+const initTrivia = () => {
+    const randomIndex = Math.floor(Math.random() * TRIVIA_DB.length);
+    currentTrivia = TRIVIA_DB[randomIndex];
+    triviaQuestionEl.textContent = `Question: ${currentTrivia.q}`;
+    // debug
+    console.log("Answer:", currentTrivia.a[0]);
+};
+
+const handleLogin = (e) => {
+    e.preventDefault();
+    const answer = triviaInput.value.trim().toLowerCase();
+
+    if (currentTrivia.a.includes(answer)) {
+        localStorage.setItem('vibe_check_passed', 'true');
+        isAuthenticated = true;
+        fetchData();
+        toggleAuthUI();
+        triviaInput.value = '';
+        triviaError.classList.add('hidden');
+    } else {
+        triviaError.classList.remove('hidden');
+        triviaInput.classList.add('shake');
+        setTimeout(() => triviaInput.classList.remove('shake'), 500);
+    }
+};
+
+const handleLogout = () => {
+    localStorage.removeItem('vibe_check_passed');
+    isAuthenticated = false;
+    toggleAuthUI();
+    initTrivia(); // Reset question
+};
+
 const toggleAuthUI = () => {
-    if (currentUser) {
+    if (isAuthenticated) {
         loginView.classList.add('hidden');
         appContent.classList.remove('hidden');
     } else {
@@ -106,7 +125,17 @@ const fetchData = async () => {
 
     if (error) {
         console.error("Error fetching data:", error);
-        classListEl.innerHTML = `<p style="text-align:center; color:#666;">Failed to load data. Check console.</p>`;
+        // Fallback or show error
+        // If Supabase isn't setup yet, showing mock data helps testing
+        if (SUPABASE_URL.includes('YOUR_SUPABASE')) {
+            console.warn("Using MOCK DATA because Supabase is not configured.");
+            classes = [
+                { id: '1', name: 'AP U.S. History', teacher: 'Mr. Anderson', reviews: [{ quality: 5, difficulty: 5, homework: 5, vibe: 'Great class' }] },
+                { id: '2', name: 'AP Physics', teacher: 'Ms. Frizzle', reviews: [] }
+            ];
+            renderClassList(searchInput.value);
+            return;
+        }
         return;
     }
 
@@ -166,7 +195,7 @@ const openClass = (id) => {
     // Reviews
     reviewsList.innerHTML = '';
     // Sort reviews new to old
-    const sortedReviews = [...c.reviews].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const sortedReviews = c.reviews ? [...c.reviews].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) : [];
 
     if (sortedReviews.length === 0) {
         reviewsList.innerHTML = `<p style="text-align:center; color:#666; font-style:italic;">No reviews yet. Be the first!</p>`;
@@ -202,7 +231,7 @@ const updateBar = (bar, val, score) => {
 };
 
 // Event Listeners
-loginBtn.addEventListener('click', handleLogin);
+loginForm.addEventListener('submit', handleLogin);
 logoutBtn.addEventListener('click', handleLogout);
 
 searchInput.addEventListener('input', (e) => renderClassList(e.target.value));
@@ -239,8 +268,8 @@ rateForm.addEventListener('submit', async (e) => {
         homework: parseInt(formData.get('homework')),
         quality: parseInt(formData.get('quality')),
         vibe: formData.get('vibe'),
-        grade: "N/A",
-        user_email: currentUser.email
+        grade: "N/A"
+        // No user_email since we are doing anonymity for students now
     };
 
     // Optimistic UI Update (optional, but let's just wait for DB for simplicity)
@@ -258,10 +287,4 @@ rateForm.addEventListener('submit', async (e) => {
 });
 
 // Init
-checkUser();
-// Listen for auth state changes (e.g. after redirect back from Google)
-db.auth.onAuthStateChange((event, session) => {
-    if (event === 'SIGNED_IN' && session) {
-        checkUser();
-    }
-});
+checkAuth();

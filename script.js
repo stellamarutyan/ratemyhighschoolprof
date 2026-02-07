@@ -38,8 +38,12 @@ const barDiff = document.getElementById('bar-difficulty');
 const valDiff = document.getElementById('val-difficulty');
 const barHW = document.getElementById('bar-homework');
 const valHW = document.getElementById('val-homework');
-const barQual = document.getElementById('bar-quality');
-const valQual = document.getElementById('val-quality');
+const barExpl = document.getElementById('bar-explanation');
+const valExpl = document.getElementById('val-explanation');
+const barCare = document.getElementById('bar-care');
+const valCare = document.getElementById('val-care');
+const barRec = document.getElementById('bar-recommendation');
+const valRec = document.getElementById('val-recommendation');
 
 // Modal DOM
 // Modal DOM
@@ -248,26 +252,87 @@ const fetchData = async () => {
 const renderClassList = (filterText = '') => {
     classListEl.innerHTML = '';
 
-    classes.filter(c => {
-        const query = filterText.toLowerCase();
-        return c.teacher.toLowerCase().includes(query) || c.name.toLowerCase().includes(query);
-    }).forEach(c => {
-        const diff = getAvg(c.reviews, 'difficulty');
-        const qual = getAvg(c.reviews, 'quality');
+    // Grouping logic
+    const grouped = {};
+    classes.forEach(c => {
+        if (!grouped[c.teacher]) {
+            grouped[c.teacher] = {
+                teacher: c.teacher,
+                subjects: []
+            };
+        }
+        grouped[c.teacher].subjects.push(c);
+    });
 
-        let tags = '';
-        if (diff >= 4.5) tags += `<span class="badge killer">💀 GPA Killer</span>`;
-        if (diff <= 2.0 && qual >= 4.0) tags += `<span class="badge chill">✨ Easy A</span>`;
-        tags += `<span class="badge score">★ ${qual}/5</span>`;
+    const teacherList = Object.values(grouped);
+
+    teacherList.filter(t => {
+        const query = filterText.toLowerCase();
+        const subjectsMatch = t.subjects.some(s => s.name.toLowerCase().includes(query));
+        return t.teacher.toLowerCase().includes(query) || subjectsMatch;
+    }).forEach(t => {
+        // Calculate aggregate stats for the teacher
+        let allReviews = [];
+        t.subjects.forEach(s => {
+            if (s.reviews) allReviews = allReviews.concat(s.reviews);
+        });
+
+        const avgRec = getAvg(allReviews, 'recommendation');
+
+        // Calculate Average Grade
+        const gradeMap = { 'A': 4, 'B': 3, 'C': 2, 'D': 1, 'F': 0 };
+        const revMap = { 4: 'A', 3: 'B', 2: 'C', 1: 'D', 0: 'F' };
+
+        let gradePoints = 0;
+        let gradedCount = 0;
+        allReviews.forEach(r => {
+            if (r.grade && gradeMap[r.grade] !== undefined) {
+                gradePoints += gradeMap[r.grade];
+                gradedCount++;
+            }
+        });
+
+        const avgGradeVal = gradedCount > 0 ? Math.round(gradePoints / gradedCount) : null;
+        const avgGradeLetter = avgGradeVal !== null ? revMap[avgGradeVal] : 'N/A';
 
         const card = document.createElement('div');
         card.className = 'class-card';
-        card.innerHTML = `
-            <h3>${c.teacher}</h3>
-            <div class="teacher-name">${c.name}</div>
-            <div class="badges">${tags}</div>
+
+        let subjectsHtml = t.subjects.map(s => `
+            <a href="#" class="subject-link" data-id="${s.id}">${s.name}</a>
+        `).join('');
+
+        let statsHtml = `
+            <div class="badges">
+                <span class="badge score" style="font-size:0.7em">★ Rec: ${avgRec}/5</span>
+                <span class="badge ${avgGradeLetter === 'A' ? 'chill' : 'score'}" style="font-size:0.7em">Grade: ${avgGradeLetter}</span>
+            </div>
         `;
-        card.onclick = () => openClass(c.id);
+
+        card.innerHTML = `
+            <div class="card-header-row">
+                <h3>${t.teacher}</h3>
+                ${allReviews.length > 0 ? statsHtml : ''}
+            </div>
+            <div class="subject-list">${subjectsHtml}</div>
+        `;
+
+        // Make entire card clickable
+        card.addEventListener('click', () => {
+            if (t.subjects && t.subjects.length > 0) {
+                openClass(t.subjects[0].id);
+            }
+        });
+
+        // Handle subject clicks specifically
+        card.querySelectorAll('.subject-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                openClass(link.dataset.id);
+            });
+        });
+
         classListEl.appendChild(card);
     });
 };
@@ -287,30 +352,33 @@ const openClass = (id) => {
     // Stats
     const diff = getAvg(c.reviews, 'difficulty');
     const hw = getAvg(c.reviews, 'homework');
-    const qual = getAvg(c.reviews, 'quality');
+    const expl = getAvg(c.reviews, 'explanation');
+    const care = getAvg(c.reviews, 'care');
+    const rec = getAvg(c.reviews, 'recommendation');
 
     updateBar(barDiff, valDiff, diff);
     updateBar(barHW, valHW, hw);
-    updateBar(barQual, valQual, qual);
+    updateBar(barExpl, valExpl, expl);
+    updateBar(barCare, valCare, care);
+    updateBar(barRec, valRec, rec);
 
     // Reviews
     reviewsList.innerHTML = '';
-    // Sort reviews new to old
     const sortedReviews = c.reviews ? [...c.reviews].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)) : [];
 
     if (sortedReviews.length === 0) {
-        reviewsList.innerHTML = `<p style="text-align:center; color:#666; font-style:italic;">No reviews yet. Be the first!</p>`;
+        reviewsList.innerHTML = `<p style="text-align:center; color:#666; font-style:italic;">No ratings yet.</p>`;
     }
 
     sortedReviews.forEach(r => {
         const div = document.createElement('div');
         div.className = 'review-card';
         div.innerHTML = `
-            <div class="review-header">
-                <span class="review-grade">Grade: ?</span>
-                <span class="badge score" style="font-size:0.7em">Qual: ${r.quality}/5</span>
+            <div class="review-header" style="margin-bottom:0">
+                <span class="review-grade">Grade: ${r.grade || 'N/A'}</span>
+                <span class="badge score" style="font-size:0.75em">Rec: ${r.recommendation}/5</span>
+                <span class="badge ${r.extra_credit === 'yes' ? 'chill' : 'killer'}" style="font-size:0.7em">EC: ${r.extra_credit === 'yes' ? 'Yes' : 'No'}</span>
             </div>
-            <div class="review-text">"${r.vibe}"</div>
         `;
         reviewsList.appendChild(div);
     });
@@ -381,12 +449,20 @@ if (rateForm) rateForm.addEventListener('submit', async (e) => {
         class_id: activeClassId,
         difficulty: parseInt(formData.get('difficulty')),
         homework: parseInt(formData.get('homework')),
-        quality: parseInt(formData.get('quality')),
-        vibe: formData.get('vibe'),
-        grade: "N/A"
+        explanation: parseInt(formData.get('explanation')),
+        care: parseInt(formData.get('care')),
+        recommendation: parseInt(formData.get('recommendation')),
+        extra_credit: formData.get('extra_credit'),
+        grade: formData.get('grade')
     };
 
-    // Optimistic UI Update
+    // Optimistic UI Update locally for testing since no DB
+    const cls = classes.find(c => c.id === activeClassId);
+    if (cls) {
+        if (!cls.reviews) cls.reviews = [];
+        cls.reviews.push({ ...newReview, created_at: new Date().toISOString() });
+    }
+
     if (db) {
         const { error } = await db.from('reviews').insert([newReview]);
         if (error) {
@@ -395,7 +471,7 @@ if (rateForm) rateForm.addEventListener('submit', async (e) => {
         }
         await fetchData();
     } else {
-        alert("Success! (Offline Mode - Review not saved permanently)");
+        alert("Success! Rating added.");
     }
 
     openClass(activeClassId); // Re-render profile

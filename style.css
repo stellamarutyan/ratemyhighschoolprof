@@ -51,6 +51,7 @@ header {
     letter-spacing: -1px;
     background: linear-gradient(90deg, #dfff00, #bd00ff);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -113,7 +114,15 @@ header {
 .class-card h3 {
     font-size: 1.1rem;
     font-weight: 700;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0;
+}
+
+.card-header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .teacher-name {
@@ -179,8 +188,15 @@ header {
 
 .ratings-summary {
     display: grid;
-    gap: 1rem;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem 1rem;
     margin-bottom: 2.5rem;
+}
+
+@media(max-width: 480px) {
+    .ratings-summary {
+        grid-template-columns: 1fr;
+    }
 }
 
 .score-card {
@@ -377,104 +393,72 @@ textarea {
     resize: none;
 }
 
-.full-width {
-    width: 100%;
-}
-
-/* Login View */
-.login-container {
-    text-align: center;
-    margin-top: 25vh;
-    padding: 0 1rem;
-    animation: slideUp 0.5s ease;
-}
-
-.login-container h1 {
-    font-size: 3rem;
-    margin-bottom: 0.5rem;
-    background: linear-gradient(90deg, #dfff00, #bd00ff);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-.challenge-box {
-    margin-top: 2rem;
-    background: var(--surface);
-    padding: 2rem;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    max-width: 400px;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.challenge-q {
-    font-size: 1.1rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    color: white;
-}
-
-#trivia-input {
-    width: 100%;
-    margin-bottom: 1rem;
-    background: var(--surface-hover);
-    border: 1px solid #444;
-    padding: 1rem;
-    text-align: center;
-    font-size: 1.1rem;
-}
-
-#trivia-input:focus {
-    border-color: var(--primary);
-}
-
-.error-msg {
-    color: #ff0055;
-    margin-top: 1rem;
-    font-weight: 700;
-    animation: shake 0.3s;
-}
-
-@keyframes shake {
-    0% {
-        transform: translateX(0);
-    }
-
-    25% {
-        transform: translateX(-5px);
-    }
-
-    75% {
-        transform: translateX(5px);
-    }
-
-    100% {
-        transform: translateX(0);
-    }
-}
-
-.shake {
-    animation: shake 0.3s;
-    border-color: #ff0055 !important;
-}
-
-.header-top {
+.form-row {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-.btn-text {
-    background: transparent;
-    border: none;
-    color: var(--text-dim);
+.form-group.half {
+    flex: 1;
+}
+
+.toggle-group {
+    display: flex;
+    gap: 1rem;
+    background: #333;
+    padding: 0.5rem;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+}
+
+.toggle-group label {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
     cursor: pointer;
+    color: white !important;
     font-weight: 600;
 }
 
-.btn-text:hover {
+select {
+    width: 100%;
+    background: #333;
+    border: none;
+    border-radius: 8px;
+    padding: 0.75rem;
     color: white;
+    font-family: inherit;
+    margin-top: 0.5rem;
+    font-weight: 600;
+}
+
+/* Subsection Styling */
+.subject-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.subject-link {
+    background: #222;
+    border: 1px solid var(--border);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--primary);
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.subject-link:hover {
+    background: var(--primary);
+    color: var(--primary-text);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(223, 255, 0, 0.3);
 }
 
 .hidden {

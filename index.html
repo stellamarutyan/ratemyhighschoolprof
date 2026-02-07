@@ -65,21 +65,35 @@
                             <div id="val-homework" class="score-val">0.0</div>
                         </div>
                         <div class="score-card">
-                            <div class="score-label">Quality</div>
+                            <div class="score-label">Explain Quality</div>
                             <div class="score-bar-bg">
-                                <div id="bar-quality" class="score-bar" style="width:0%"></div>
+                                <div id="bar-explanation" class="score-bar" style="width:0%"></div>
                             </div>
-                            <div id="val-quality" class="score-val">0.0</div>
+                            <div id="val-explanation" class="score-val">0.0</div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">Student Care</div>
+                            <div class="score-bar-bg">
+                                <div id="bar-care" class="score-bar" style="width:0%"></div>
+                            </div>
+                            <div id="val-care" class="score-val">0.0</div>
+                        </div>
+                        <div class="score-card">
+                            <div class="score-label">Recommend?</div>
+                            <div class="score-bar-bg">
+                                <div id="bar-recommendation" class="score-bar" style="width:0%"></div>
+                            </div>
+                            <div id="val-recommendation" class="score-val">0.0</div>
                         </div>
                     </div>
 
                     <div class="section-header">
-                        <h3>💬 Vibe Checks</h3>
+                        <h3>📊 Review Stats</h3>
                         <button id="add-review-btn" class="btn-primary small">Rate Teacher</button>
                     </div>
 
                     <div id="reviews-list" class="reviews-list">
-                        <!-- Reviews injected here -->
+                        <!-- Numeric reviews injected here -->
                     </div>
                 </section>
             </main>
@@ -102,24 +116,54 @@
                         </div>
 
                         <div class="slider-group">
-                            <label>Homework (1 = None, 5 = Drowning)</label>
+                            <label>Homework (1 = None, 5 = Extreme)</label>
                             <input type="range" id="input-homework" name="homework" min="1" max="5" step="1" value="3">
                             <div class="range-labels"><span>1</span><span>5</span></div>
                         </div>
 
                         <div class="slider-group">
-                            <label>Quality (1 = Avoid, 5 = GOAT)</label>
-                            <input type="range" id="input-quality" name="quality" min="1" max="5" step="1" value="3">
+                            <label>Explain Quality (1 = Horrible, 5 = Amazing)</label>
+                            <input type="range" id="input-explanation" name="explanation" min="1" max="5" step="1"
+                                value="3">
                             <div class="range-labels"><span>1</span><span>5</span></div>
                         </div>
 
-                        <div class="form-group">
-                            <label>Vibe Check (Comments)</label>
-                            <textarea id="input-vibe" name="vibe" rows="3" placeholder="What's the tea? 🍵"
-                                required></textarea>
+                        <div class="slider-group">
+                            <label>Student Care (1 = Doesn't care, 5 = Cares a lot)</label>
+                            <input type="range" id="input-care" name="care" min="1" max="5" step="1" value="3">
+                            <div class="range-labels"><span>1</span><span>5</span></div>
                         </div>
 
-                        <button type="submit" class="btn-primary full-width">Post Vibe Check</button>
+                        <div class="slider-group">
+                            <label>Recommend? (1 = Horrible, 5 = Amazing)</label>
+                            <input type="range" id="input-recommendation" name="recommendation" min="1" max="5" step="1"
+                                value="3">
+                            <div class="range-labels"><span>1</span><span>5</span></div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group half">
+                                <label>Extra Credit/Curves?</label>
+                                <div class="toggle-group">
+                                    <label><input type="radio" name="extra_credit" value="yes" required> Yes</label>
+                                    <label><input type="radio" name="extra_credit" value="no"> No</label>
+                                </div>
+                            </div>
+
+                            <div class="form-group half">
+                                <label>Grade (Optional)</label>
+                                <select id="input-grade" name="grade">
+                                    <option value="N/A">N/A</option>
+                                    <option value="A">A</option>
+                                    <option value="B">B</option>
+                                    <option value="C">C</option>
+                                    <option value="D">D</option>
+                                    <option value="F">F</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn-primary full-width">Post Review</button>
                     </form>
 
                     <!-- Add Class Form Removed -->
